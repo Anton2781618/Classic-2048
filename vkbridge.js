@@ -90,13 +90,13 @@
 
     window.vkLoadData = function(key) {
         if (!window.environmentData || !window.environmentData.initialized) {
-            console.error('VK SDK not initialized');
+            console.error('!!!VK SDK не инициализирован!');
             return;
         }
         return vkBridge.send('VKWebAppStorageGet', {
             keys: [key]
         }).then(function(data) {
-            console.log('Data loaded:', data);
+            console.log('!!!Данные загруженны:', data);
             if (window.unityInstance) {
                 const value = data.keys[0].value || '';
                 window.unityInstance.SendMessage('PlatformSDKManager', 'OnLoadComplete', JSON.stringify({
@@ -105,7 +105,7 @@
                 }));
             }
         }).catch(function(error) {
-            console.error('Load data error:', error);
+            console.error('!!!Ошибка при загрузке данных:', error);
             if (window.unityInstance) {
                 window.unityInstance.SendMessage('PlatformSDKManager', 'OnLoadError', error.toString());
             }
@@ -114,7 +114,7 @@
 
     // Подписываемся на события VK Bridge
     vkBridge.subscribe(function(event) {
-        console.log('VK Bridge event:', event);
+        console.log('!!!VK Bridge событие:', event);
         if (window.unityInstance) {
             switch(event.detail.type) {
                 case 'VKWebAppViewHide':
@@ -128,5 +128,5 @@
     });
 
     // Сообщаем о готовности VK Bridge
-    console.log('VK Bridge methods initialized');
+    console.log('!!!Методы VK Bridge проинициализированы!');
 })();

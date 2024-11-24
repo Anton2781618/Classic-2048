@@ -10,6 +10,9 @@ window.cloudSaves = {
     data: {}
 };
 
+// Глобальная переменная для выбора типа хранилища
+window.useLocalStorage = false;
+
 function vkBridgeInit() {
     // VK Bridge уже инициализирован в vkbridge.js
     console.log('VK SDK initialized');
@@ -30,8 +33,23 @@ window.showVKRewardedAd = function() {
     }
 };
 
+// Функция для сохранения данных (поддерживает оба типа хранилища)
 window.vkSaveData = function(key, value) {
-    if (typeof window.vkBridge !== 'undefined') {
+    if (window.useLocalStorage) {
+        try {
+            localStorage.setItem(key, value);
+            console.log('Saved to localStorage:', { key, value });
+            // Уведомляем Unity об успешном сохранении
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveComplete', key);
+            }
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveError', error.toString());
+            }
+        }
+    } else if (typeof window.vkBridge !== 'undefined') {
         window.cloudSaves.data[key] = value;
         return window.vkBridge.send('VKWebAppStorageSet', {
             key: key,
@@ -40,8 +58,26 @@ window.vkSaveData = function(key, value) {
     }
 };
 
+// Функция для загрузки данных (поддерживает оба типа хранилища)
 window.vkLoadData = function(key) {
-    if (typeof window.vkBridge !== 'undefined') {
+    if (window.useLocalStorage) {
+        try {
+            const value = localStorage.getItem(key) || '';
+            console.log('Loaded from localStorage:', { key, value });
+            // Отправляем данные в Unity
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnLoadComplete', JSON.stringify({
+                    key: key,
+                    value: value
+                }));
+            }
+        } catch (error) {
+            console.error('Error loading from localStorage:', error);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnLoadError', error.toString());
+            }
+        }
+    } else if (typeof window.vkBridge !== 'undefined') {
         return window.vkBridge.send('VKWebAppStorageGet', {
             keys: [key]
         }).then(function(data) {
@@ -62,4 +98,10 @@ window.InitCloudStorage = function() {
         };
     }
     return window.cloudSaves;
+};
+
+// Функция для установки типа хранилища
+window.setStorageType = function(useLocal) {
+    window.useLocalStorage = useLocal;
+    console.log('Storage type set to:', useLocal ? 'localStorage' : 'cloud storage');
 };
