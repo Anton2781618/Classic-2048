@@ -19,6 +19,9 @@
             }
             if (window.unityInstance) {
                 window.unityInstance.SendMessage('PlatformSDKManager', 'OnUserDataReceived', JSON.stringify(data));
+                // После получения данных пользователя пробуем загрузить сохранения
+                console.log('Attempting to load saved data...');
+                window.vkLoadData('SavedGameData');
             }
         })
         .catch(function(error) {
@@ -72,11 +75,12 @@
             console.error('VK SDK not initialized');
             return;
         }
+        console.log('Saving data:', { key, value });
         return vkBridge.send('VKWebAppStorageSet', {
             key: key,
             value: value
         }).then(function(data) {
-            console.log('Data saved:', { key, value });
+            console.log('Data saved successfully:', { key, value });
             if (window.unityInstance) {
                 window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveComplete', key);
             }
@@ -93,6 +97,7 @@
             console.error('!!!VK SDK не инициализирован!');
             return;
         }
+        console.log('Loading data for key:', key);
         return vkBridge.send('VKWebAppStorageGet', {
             keys: [key]
         }).then(function(data) {
@@ -113,7 +118,7 @@
     };
 
     // Подписываемся на события VK Bridge
-    vkBridge.subscribe(function(event) {
+    /*vkBridge.subscribe(function(event) {
         console.log('!!!VK Bridge событие:', event);
         if (window.unityInstance) {
             switch(event.detail.type) {
@@ -125,7 +130,7 @@
                     break;
             }
         }
-    });
+    });*/
 
     // Сообщаем о готовности VK Bridge
     console.log('!!!Методы VK Bridge проинициализированы!');

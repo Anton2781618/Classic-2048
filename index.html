@@ -122,6 +122,11 @@
         }).then((unityInstance) => {
           window.unityInstance = unityInstance;
           loadingCover.style.display = "none";
+          // После создания Unity Instance пробуем загрузить сохранения
+          console.log('!!!Unity Instance создан, пробуем загрузить сохранения');
+          if (window.vkLoadData) {
+            window.vkLoadData('SavedGameData');
+          }
         }).catch((message) => {
           console.error('Unity error:', message);
         });
