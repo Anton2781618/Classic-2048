@@ -14,6 +14,9 @@
         })
         .then(function(data) {
             console.log('User data received:', data);
+            if (window.environmentData) {
+                window.environmentData.userInfo = data;
+            }
             if (window.unityInstance) {
                 window.unityInstance.SendMessage('PlatformSDKManager', 'OnUserDataReceived', JSON.stringify(data));
             }
@@ -24,6 +27,10 @@
 
     // Методы для работы с рекламой
     window.vkShowInterstitial = function() {
+        if (!window.environmentData || !window.environmentData.initialized) {
+            console.error('VK SDK not initialized');
+            return;
+        }
         return vkBridge.send('VKWebAppShowNativeAds', {
             ad_format: 'interstitial'
         }).then(function(data) {
@@ -40,6 +47,10 @@
     };
 
     window.vkShowRewarded = function() {
+        if (!window.environmentData || !window.environmentData.initialized) {
+            console.error('VK SDK not initialized');
+            return;
+        }
         return vkBridge.send('VKWebAppShowNativeAds', {
             ad_format: 'reward'
         }).then(function(data) {
@@ -57,6 +68,10 @@
 
     // Методы для работы с данными
     window.vkSaveData = function(key, value) {
+        if (!window.environmentData || !window.environmentData.initialized) {
+            console.error('VK SDK not initialized');
+            return;
+        }
         return vkBridge.send('VKWebAppStorageSet', {
             key: key,
             value: value
@@ -74,6 +89,10 @@
     };
 
     window.vkLoadData = function(key) {
+        if (!window.environmentData || !window.environmentData.initialized) {
+            console.error('VK SDK not initialized');
+            return;
+        }
         return vkBridge.send('VKWebAppStorageGet', {
             keys: [key]
         }).then(function(data) {

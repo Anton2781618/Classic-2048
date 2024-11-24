@@ -83,10 +83,13 @@
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     
     <!-- Наши скрипты -->
-    <script src="vkbridge.js"></script>
     <script src="vksdk.js"></script>
+    <script src="vkbridge.js"></script>
 
     <script>
+      // Инициализируем VK Bridge до загрузки Unity
+      vkBridgeInit();
+
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/Classic2048.loader.js";
       var config = {
@@ -119,8 +122,6 @@
         }).then((unityInstance) => {
           window.unityInstance = unityInstance;
           loadingCover.style.display = "none";
-          // Инициализируем VK SDK после загрузки Unity
-          vkBridgeInit();
         }).catch((message) => {
           console.error('Unity error:', message);
         });
