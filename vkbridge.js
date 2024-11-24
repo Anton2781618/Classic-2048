@@ -6,81 +6,108 @@
     }
 
     // Инициализация VK Bridge
-    try {
-        vkBridge.send('VKWebAppInit')
-            .then(function(data) {
-                if (data.result) {
-                    console.log('VK Bridge initialization succeeded');
-                    // Получаем информацию о пользователе
-                    return vkBridge.send('VKWebAppGetUserInfo');
-                } else {
-                    console.warn('VK Bridge initialization failed');
-                }
-            })
-            .then(function(data) {
-                console.log('User data received:', data);
-            })
-            .catch(function(error) {
-                console.error('VK Bridge error:', error);
-            });
-    } catch (error) {
-        console.error('VK Bridge initialization error:', error);
-    }
+    vkBridge.send('VKWebAppInit')
+        .then(function() {
+            console.log('VK Bridge initialized');
+            // После успешной инициализации получаем данные пользователя
+            return vkBridge.send('VKWebAppGetUserInfo');
+        })
+        .then(function(data) {
+            console.log('User data received:', data);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnUserDataReceived', JSON.stringify(data));
+            }
+        })
+        .catch(function(error) {
+            console.error('VK Bridge error:', error);
+        });
 
     // Методы для работы с рекламой
     window.vkShowInterstitial = function() {
-        return vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' })
-            .catch(function(error) {
-                console.error('Show interstitial ad error:', error);
-                return Promise.reject(error);
-            });
+        return vkBridge.send('VKWebAppShowNativeAds', {
+            ad_format: 'interstitial'
+        }).then(function(data) {
+            console.log('Interstitial ad shown:', data);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnAdCompleted');
+            }
+        }).catch(function(error) {
+            console.error('Show interstitial ad error:', error);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnAdError', error.toString());
+            }
+        });
     };
 
     window.vkShowRewarded = function() {
-        return vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' })
-            .catch(function(error) {
-                console.error('Show rewarded ad error:', error);
-                return Promise.reject(error);
-            });
+        return vkBridge.send('VKWebAppShowNativeAds', {
+            ad_format: 'reward'
+        }).then(function(data) {
+            console.log('Rewarded ad shown:', data);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnRewardedAdCompleted');
+            }
+        }).catch(function(error) {
+            console.error('Show rewarded ad error:', error);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnAdError', error.toString());
+            }
+        });
     };
 
     // Методы для работы с данными
-    window.vkStorageSet = function(key, value) {
-        return vkBridge.send('VKWebAppStorageSet', { key: key, value: String(value) })
-            .catch(function(error) {
-                console.error('Storage set error:', error);
-                return Promise.reject(error);
-            });
+    window.vkSaveData = function(key, value) {
+        return vkBridge.send('VKWebAppStorageSet', {
+            key: key,
+            value: value
+        }).then(function(data) {
+            console.log('Data saved:', { key, value });
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveComplete', key);
+            }
+        }).catch(function(error) {
+            console.error('Save data error:', error);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveError', error.toString());
+            }
+        });
     };
 
-    window.vkStorageGet = function(key) {
-        return vkBridge.send('VKWebAppStorageGet', { keys: [key] })
-            .catch(function(error) {
-                console.error('Storage get error:', error);
-                return Promise.reject(error);
-            });
+    window.vkLoadData = function(key) {
+        return vkBridge.send('VKWebAppStorageGet', {
+            keys: [key]
+        }).then(function(data) {
+            console.log('Data loaded:', data);
+            if (window.unityInstance) {
+                const value = data.keys[0].value || '';
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnLoadComplete', JSON.stringify({
+                    key: key,
+                    value: value
+                }));
+            }
+        }).catch(function(error) {
+            console.error('Load data error:', error);
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('PlatformSDKManager', 'OnLoadError', error.toString());
+            }
+        });
     };
 
     // Подписываемся на события VK Bridge
     vkBridge.subscribe(function(event) {
         console.log('VK Bridge event:', event);
-        switch(event.detail.type) {
-            case 'VKWebAppViewHide':
-                // Игра свернута
-                if (window.unityInstance) {
+        if (window.unityInstance) {
+            switch(event.detail.type) {
+                case 'VKWebAppViewHide':
                     window.unityInstance.SendMessage('PlatformSDKManager', 'OnApplicationPause', 'true');
-                }
-                break;
-            case 'VKWebAppViewRestore':
-                // Игра развернута
-                if (window.unityInstance) {
+                    break;
+                case 'VKWebAppViewRestore':
                     window.unityInstance.SendMessage('PlatformSDKManager', 'OnApplicationPause', 'false');
-                }
-                break;
+                    break;
+            }
         }
     });
 
     // Сообщаем о готовности VK Bridge
-    window.vkBridgeReady = true;
     console.log('VK Bridge methods initialized');
 })();
