@@ -18,7 +18,7 @@
                 window.environmentData.userInfo = data;
             }
             if (window.unityInstance) {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnUserDataReceived', JSON.stringify(data));
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnUserDataReceived', JSON.stringify(data));
                 // После получения данных пользователя пробуем загрузить сохранения
                 console.log('Attempting to load saved data...');
                 window.vkLoadData('SavedGameData');
@@ -39,12 +39,12 @@
         }).then(function(data) {
             console.log('Interstitial ad shown:', data);
             if (window.unityInstance) {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnAdCompleted');
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnAdCompleted');
             }
         }).catch(function(error) {
             console.error('Show interstitial ad error:', error);
             if (window.unityInstance) {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnAdError', error.toString());
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnAdError', error.toString());
             }
         });
     };
@@ -59,12 +59,12 @@
         }).then(function(data) {
             console.log('Rewarded ad shown:', data);
             if (window.unityInstance) {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnRewardedAdCompleted');
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnRewardedAdCompleted');
             }
         }).catch(function(error) {
             console.error('Show rewarded ad error:', error);
             if (window.unityInstance) {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnAdError', error.toString());
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnAdError', error.toString());
             }
         });
     };
@@ -82,12 +82,12 @@
         }).then(function(data) {
             console.log('Data saved successfully:', { key, value });
             if (window.unityInstance) {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveComplete', key);
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnSaveComplete', key);
             }
         }).catch(function(error) {
             console.error('Save data error:', error);
             if (window.unityInstance) {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveError', error.toString());
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnSaveError', error.toString());
             }
         });
     };
@@ -104,33 +104,15 @@
             console.log('!!!Данные загруженны:', data);
             if (window.unityInstance) {
                 const value = data.keys[0].value || '';
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnLoadComplete', JSON.stringify({
-                    key: key,
-                    value: value
-                }));
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnLoadComplete', value);
             }
         }).catch(function(error) {
             console.error('!!!Ошибка при загрузке данных:', error);
             if (window.unityInstance) {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnLoadError', error.toString());
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnLoadError', error.toString());
             }
         });
     };
-
-    // Подписываемся на события VK Bridge
-    /*vkBridge.subscribe(function(event) {
-        console.log('!!!VK Bridge событие:', event);
-        if (window.unityInstance) {
-            switch(event.detail.type) {
-                case 'VKWebAppViewHide':
-                    window.unityInstance.SendMessage('PlatformSDKManager', 'OnApplicationPause', 'true');
-                    break;
-                case 'VKWebAppViewRestore':
-                    window.unityInstance.SendMessage('PlatformSDKManager', 'OnApplicationPause', 'false');
-                    break;
-            }
-        }
-    });*/
 
     // Сообщаем о готовности VK Bridge
     console.log('!!!Методы VK Bridge проинициализированы!');
