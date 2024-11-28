@@ -65,7 +65,7 @@ window.vkSaveData = function(key, value)
             // Уведомляем Unity об успешном сохранении
             if (window.unityInstance) 
             {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveComplete', key);
+                window.unityInstance.SendMessage('VKPlatformSDK', 'OnSaveComplete', key);
             }
         } 
         catch (error) 
@@ -74,7 +74,7 @@ window.vkSaveData = function(key, value)
             
             if (window.unityInstance) 
             {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'OnSaveError', error.toString());
+                window.unityInstance.SendMessage('VKPlatformSDK', 'OnSaveError', error.toString());
             }
         }
     } 
@@ -104,7 +104,7 @@ window.vkLoadData = function(key)
             // Отправляем данные в Unity
             if (window.unityInstance) 
             {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'JSOnLoadComplete', JSON.stringify(
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnLoadComplete', JSON.stringify(
                 {
                     key: key,
                     value: value
@@ -121,7 +121,7 @@ window.vkLoadData = function(key)
             
             if (window.unityInstance) 
             {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'JSOnLoadError', error.toString());
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnLoadError', error.toString());
             }
         }
     } 
@@ -142,7 +142,7 @@ window.vkLoadData = function(key)
                 
                 if (window.unityInstance) 
                 {
-                    window.unityInstance.SendMessage('PlatformSDKManager', 'JSOnLoadComplete', JSON.stringify(
+                    window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnLoadComplete', JSON.stringify(
                     {
                         key: key,
                         value: data.keys[0].value
@@ -157,7 +157,7 @@ window.vkLoadData = function(key)
             {
                 if (window.unityInstance) 
                 {
-                    window.unityInstance.SendMessage('PlatformSDKManager', 'JSOnLoadComplete', JSON.stringify(
+                    window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnLoadComplete', JSON.stringify(
                     {
                         key: key,
                         value: ''
@@ -175,7 +175,7 @@ window.vkLoadData = function(key)
             
             if (window.unityInstance) 
             {
-                window.unityInstance.SendMessage('PlatformSDKManager', 'JSOnLoadError', error.toString());
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnLoadError', error.toString());
             }
             else
             {

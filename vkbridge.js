@@ -1,10 +1,10 @@
-    /* 
-    Отвечает за непосредственное взаимодействие с VK Bridge API
-    Содержит основную логику инициализации VK Bridge
-    Реализует прямые вызовы методов VK Bridge (реклама, сохранение/загрузка данных)
-    Обрабатывает ответы от VK Bridge и отправляет их в Unity через SendMessage
-    Работает напрямую с VK API 
-    */
+/* 
+Отвечает за непосредственное взаимодействие с VK Bridge API
+Содержит основную логику инициализации VK Bridge
+Реализует прямые вызовы методов VK Bridge (реклама, сохранение/загрузка данных)
+Обрабатывает ответы от VK Bridge и отправляет их в Unity через SendMessage
+Работает напрямую с VK API 
+*/
 (function() {
     // Проверяем доступность VK Bridge
     if (typeof vkBridge === 'undefined') 
@@ -29,7 +29,9 @@
                 window.environmentData.userInfo = data;
             }
             
-            SendMessage('VKPlatformSDK', 'JSOnUserDataReceived', JSON.stringify(data));
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnUserDataReceived', JSON.stringify(data));
+            }
             
             // После получения данных пользователя пробуем загрузить сохранения
             console.log('Attempting to load saved data...');
@@ -51,12 +53,16 @@
         .then(function(data) 
         {
             console.log('Interstitial ad shown:', data);
-            SendMessage('VKPlatformSDK', 'JSOnAdCompleted');
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnAdCompleted');
+            }
         })
         .catch(function(error) 
         {
             console.error('Show interstitial ad error:', error);
-            SendMessage('VKPlatformSDK', 'JSOnAdError', error.toString());
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnAdError', error.toString());
+            }
         });
     };
 
@@ -69,12 +75,16 @@
         .then(function(data) 
         {
             console.log('Rewarded ad shown:', data);
-            SendMessage('VKPlatformSDK', 'JSOnRewardedAdCompleted');
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnRewardedAdCompleted');
+            }
         })
         .catch(function(error) 
         {
             console.error('Show rewarded ad error:', error);
-            SendMessage('VKPlatformSDK', 'JSOnAdError', error.toString());
+            if (window.unityInstance) {
+                window.unityInstance.SendMessage('VKPlatformSDK', 'JSOnAdError', error.toString());
+            }
         });
     };
 
